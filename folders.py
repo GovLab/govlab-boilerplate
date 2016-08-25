@@ -6,7 +6,7 @@ package.json
 source/
   vendor/
     styleguide/   # styleguide SASS, JS and Image files | I want this as SASS files so we can use the variables, and @extend classes.
-      images/**
+      images/**   # the styleguide doesn't need to be in this folder. If it is easier to pull it into /node_modules, let's do it
       components/**
       styleguide.scss
       foundation.min.css
@@ -14,32 +14,35 @@ source/
       slick.css
       slick.js
   
-  static/
-    images/       # site specific images
+  images/         # site specific images
+
+  js/
     scripts.js    # site specific js
 
   templates/      
     _base.html    # boilerplate base. Base setup for a styleguide enabled site. Can be tweaked for each project.
     index.html    # index example. Will be tweaked for the project needs
                   # temp vinyl files whould not be saved here, or at least kept in .gitignore
+  
   data/
     data.json     # global data file, available anywhere in the system using {{global.variable}} | Check below
     
   sass/           # site specific styles. Specific components, tweaks or new reusable components are added here.
-    styles.scss   # @import ../vendor/styleguide/**.scss and _custom.scss
+    styles.scss   # @import ../**/styleguide/**.scss and _custom.scss
     _custom.scss
 
 gulpfile.js
 # imports 'extra-tasks.js' | or whichever name you prefer :)
-# Task - clean - clean public on watch
-# Task - browser-sync
-# Task - sass - with sourcemaps, and error log (not breaking gulp watch)
-# Tasks - vendor, image, js - copying files from source to public - maybe watch the data/ folder?
+# DONE- Task - clean - clean public on watch
+# DONE - Task - browser-sync
+# DONE - Task - sass - with sourcemaps, and error log (not breaking gulp watch)
+# DONE - Tasks - vendor, image, js - copying files from source to public
+# Task - maybe watch the data/ folder for auto refresh on that?
 # Task - nunjucks
-# Tasks - push-gh-master, push-gh-pages - these areused for the deploy task
-# Task - deploy
-# Task - watch
-# Task - default
+# DONE - Tasks - push-gh-master, push-gh-pages - these areused for the deploy task
+# DONE - Task - deploy
+# HALF-DONE - Task - watch
+# HALF-DONE - Task - default
 
 extra_tasks.js
 # long file with the long tasks
@@ -56,7 +59,7 @@ data.json # Example
       'posts': 'http://url-from-contentful-api.json',
       'template': 'posts.html'
     },{ 
-      'resources': 'http://url-from-contentful-api.json',
+      'resources': 'resources.json',
       'template': ''
     },{
     ...
