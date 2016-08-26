@@ -11,7 +11,7 @@ var del             = require('del'),
     nunjucksRender  = require('gulp-nunjucks-render'),
     nunjucksEnv     = require('./gulp-nunjucks-env.js'),
     nunjucksGenerate = require('./gulp-nunjucks-generate.js'),
-    nunjucksHTTP     = require('./gulp-nunjucks-http.js'),
+    nunjucksHTTP    = require('./gulp-nunjucks-http.js'),
     gulpConfig      = require('./gulpfile-config.js')
     ;
 
