@@ -2,24 +2,37 @@
 // gulp task module for tasks related to the static site build pipeline
 
 // config file
-const config = require('../gulp-config.js');
+const config = require('../gulp-config.js')('..');
+const configCwd = require('../gulp-config.js')('.');
 
 var
 // libs
+fs              = require('fs'),
+md5             = require('md5'),
+File            = require('vinyl'),
 gulp            = require('gulp'),
 util            = require('gulp-util'),
 yaml            = require('gulp-yaml'),
-File            = require('vinyl'),
-fs              = require('fs'),
+data            = require('gulp-data'),
 nunjucksRender  = require('gulp-nunjucks-render'),
 flatten         = require('gulp-flatten'),
 plumber         = require('gulp-plumber'),
 intercept       = require('gulp-intercept'),
-md5             = require('md5'),
 
 // local libs
 gen             = require('./gulp-nunjucks-generate.js')
 ;
+
+// converts string t to a slug (eg 'Some Text Here' becomes 'some-text-here')
+var slugify = function (t) {
+  return t ? t.toString().toLowerCase()
+  .replace(/\s+/g, '-')
+  .replace(/[^\w\-]+/g, '')
+  .replace(/\-\-+/g, '-')
+  .replace(/^-+/, '')
+  .replace(/-+$/, '')
+  : false ;
+};
 
 exports.yaml = function () {
   return gulp.src(config.options.dataPath + '**/*.+(yaml|yml)')
@@ -72,7 +85,7 @@ exports.json = function() {
 };
 
 exports.nunjucksGenerated = function() {
-  return gen.generateVinyl(config.options.path, config.options.dataPath)
+  return gen.generateVinyl(configCwd.options.path, configCwd.options.dataPath)
   .pipe(plumber())
   .pipe(data(function(file) {
     if (config.cliOptions.verbose) {
@@ -88,18 +101,6 @@ exports.nunjucksGenerated = function() {
   .pipe(flatten())
   .pipe(gulp.dest(config.options.sitePath));
 };
-
-exports.nunjucksData = function() {
-  return gulp.src(config.options.path)
-  .pipe(plumber())
-  .pipe(data(function(file) {
-    return gen.generatedData;
-  }))
-  .pipe(nunjucksRender(config.options))
-  .pipe(flatten())
-  .pipe(gulp.dest(config.options.sitePath));
-};
-
 
 exports.nunjucksHTTP = function() {
   return gulp.src(config.options.path + '**/*.+(html|nunjucks)')
@@ -120,9 +121,18 @@ exports.nunjucksHTTP = function() {
     });
 
   }))
-  .pipe(nunjucksRender({
-    path: ['source/templates'],
-    manageEnv: nunjucksEnv
+  .pipe(nunjucksRender(config.options))
+  .pipe(flatten())
+  .pipe(gulp.dest(config.options.sitePath));
+};
+
+exports.nunjucks = function() {
+  return gulp.src(config.options.path)
+  .pipe(plumber())
+  .pipe(data(function(file) {
+    return gen.generatedData;
   }))
+  .pipe(nunjucksRender(config.options))
+  .pipe(flatten())
   .pipe(gulp.dest(config.options.sitePath));
 };

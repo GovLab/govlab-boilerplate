@@ -1,7 +1,14 @@
 // gulp-nunjucks-generate.js
 // functions related to custom data injection and generating "one-to-many" templates with nunjucks
 
-const config = require('../gulp-config.js');
+const config = require('../gulp-config.js')('..');
+const configCwd = require('../gulp-config.js')('.');
+
+var
+File            = require('vinyl'),
+es              = require('event-stream'),
+fs              = require('fs')
+;
 
 // object used to compile data extracted from the data sources
 exports.generatedData = {}
@@ -25,7 +32,7 @@ var compileData = function (dataPath, ext) {
       baseName = dataDir[dataset].replace(new RegExp('\\' + ext + '$'), '');
 
       // add JSON to object
-      _data = require(dataPath + dataDir[dataset]).data;
+      _data = require(config.options.dataPath + dataDir[dataset]).data;
       exports.generatedData[baseName] = _data;
     }
   }
