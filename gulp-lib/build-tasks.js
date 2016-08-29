@@ -2,6 +2,7 @@
 // gulp task module for tasks related to the static site build pipeline
 
 // config file
+// --- using both for testing, but probably only need one ---
 const config = require('../gulp-config.js')('..');
 const configCwd = require('../gulp-config.js')('.');
 
@@ -35,13 +36,13 @@ var slugify = function (t) {
 };
 
 exports.yaml = function () {
-  return gulp.src(config.options.dataPath + '**/*.+(yaml|yml)')
+  return gulp.src(configCwd.options.dataPath + '**/*.+(yaml|yml)')
   .pipe(yaml())
-  .pipe(gulp.dest(config.options.dataPath));
+  .pipe(gulp.dest(configCwd.options.dataPath));
 };
 
 exports.json = function() {
-  return gulp.src(config.options.dataPath + '**/*.json')
+  return gulp.src(configCwd.options.dataPath + '**/*.json')
   .pipe(intercept(function(file) {
     var o = JSON.parse(file.contents.toString()),
     b = {},
@@ -81,7 +82,7 @@ exports.json = function() {
       file.contents = new Buffer(JSON.stringify(b));
       return file;
     }))
-  .pipe(gulp.dest(config.options.dataPath));
+  .pipe(gulp.dest(configCwd.options.dataPath));
 };
 
 exports.nunjucksGenerated = function() {
@@ -97,13 +98,13 @@ exports.nunjucksGenerated = function() {
     d.$global = gen.generatedData;
     return d;
   }))
-  .pipe(nunjucksRender(config.options))
+  .pipe(nunjucksRender(configCwd.options))
   .pipe(flatten())
-  .pipe(gulp.dest(config.options.sitePath));
+  .pipe(gulp.dest(configCwd.options.sitePath));
 };
 
 exports.nunjucksHTTP = function() {
-  return gulp.src(config.options.path + '**/*.+(html|nunjucks)')
+  return gulp.src(configCwd.options.path + '**/*.+(html|nunjucks)')
   .pipe(data(function(file, cb) {
 
     var httpData = '';
@@ -123,16 +124,18 @@ exports.nunjucksHTTP = function() {
   }))
   .pipe(nunjucksRender(config.options))
   .pipe(flatten())
-  .pipe(gulp.dest(config.options.sitePath));
+  .pipe(gulp.dest(configCwd.options.sitePath));
 };
 
 exports.nunjucks = function() {
-  return gulp.src(config.options.path)
+  console.log(configCwd.options.path)
+  return gulp.src(configCwd.options.path + '**/*.+(html|nunjucks)')
   .pipe(plumber())
   .pipe(data(function(file) {
+    console.log(file.path);
     return gen.generatedData;
   }))
-  .pipe(nunjucksRender(config.options))
+  .pipe(nunjucksRender(configCwd.options))
   .pipe(flatten())
-  .pipe(gulp.dest(config.options.sitePath));
+  .pipe(gulp.dest(configCwd.options.sitePath));
 };
