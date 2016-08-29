@@ -12,6 +12,7 @@
     "browser-sync": "^2.13.0",
     "del": "^2.2.1",
     "event-stream": "^3.3.4",
+    "govlab-styleguide-2": "0.0.1",
     "gulp": "^3.9.1",
     "gulp-data": "^1.2.1",
     "gulp-flatten": "^0.3.1",
