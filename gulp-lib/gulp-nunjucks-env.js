@@ -1,17 +1,8 @@
-  exports.fiz = function () {
-      console.log('fiz!');
-  }
+// gulp-nunjucks-env.js
+// add filters, globals, etc to the nunjucks environment
 
-// set up nunjucks environment
-function nunjucksEnv(env) {
-    env.addFilter('slug', slugify);
-    env.addFilter('dateFilter', dateFilter);
-    env.addGlobal('getContext', function() {
-        return this.ctx;
-    });
-}
-
-function dateFilter(date, arg) {
+// returns a nicely formatted date based on keyword arg
+var dateFilter = function (date, arg) {
     var locale = "en-us";
     var date = new Date(date);
     switch (arg) {
@@ -25,10 +16,10 @@ function dateFilter(date, arg) {
         return date.getFullYear();
         break;
     }
-}
+};
 
 // converts string t to a slug (eg 'Some Text Here' becomes 'some-text-here')
-function slugify(t) {
+var slugify = function (t) {
   return t ? t.toString().toLowerCase()
   .replace(/\s+/g, '-')
   .replace(/[^\w\-]+/g, '')
@@ -36,4 +27,13 @@ function slugify(t) {
   .replace(/^-+/, '')
   .replace(/-+$/, '')
   : false ;
-}
+};
+
+// set up nunjucks environment
+module.exports = (env) => {
+    env.addFilter('slug', slugify);
+    env.addFilter('dateFilter', dateFilter);
+    env.addGlobal('getContext', function() {
+        return this.ctx;
+    });
+};

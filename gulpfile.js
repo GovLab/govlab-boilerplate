@@ -1,3 +1,8 @@
+// import paths
+const libDir    = 'gulp-lib/'
+      ;
+
+// libs
 var del             = require('del'),
     gulp            = require('gulp'),
     sass            = require('gulp-sass'),
@@ -9,10 +14,16 @@ var del             = require('del'),
     browserSync     = require('browser-sync'),
     runSequence     = require('run-sequence').use(gulp),
     nunjucksRender  = require('gulp-nunjucks-render'),
-    nunjucksEnv     = require('./gulp-nunjucks-env.js'),
-    nunjucksGenerate = require('./gulp-nunjucks-generate.js'),
-    nunjucksHTTP    = require('./gulp-nunjucks-http.js'),
-    gulpConfig      = require('./gulpfile-config.js')
+
+    // gulpfile config options
+    config           = require(process.cwd() + 'gulp-config.js'),
+
+    // local libs
+    nunjucksEnv      = require(process.cwd() + libDir + 'gulp-nunjucks-env.js'),
+    nunjucksGenerate = require(process.cwd() + libDir + 'gulp-nunjucks-generate.js'),
+
+    // tasks
+    build = require(process.cwd() + libDir + 'build-tasks.js')
     ;
 
 // Clean Dist
@@ -87,6 +98,7 @@ gulp.task('deploy', function (callback) {
   );
 });
 
+//limit watch files
 gulp.task('watch', function () {
   gulp.watch('source/static/**/*.js', ['js']);
   gulp.watch('source/sass/**/*.scss', ['sass']);
