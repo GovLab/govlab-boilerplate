@@ -6,7 +6,8 @@ const config = require('../gulp-config.js');
 
 var
 // libs
-util            = require('gulp-util');
+gulp            = require('gulp'),
+util            = require('gulp-util'),
 yaml            = require('gulp-yaml'),
 File            = require('vinyl'),
 fs              = require('fs'),
@@ -96,5 +97,32 @@ exports.nunjucksData = function() {
   }))
   .pipe(nunjucksRender(config.options))
   .pipe(flatten())
+  .pipe(gulp.dest(config.options.sitePath));
+};
+
+
+exports.nunjucksHTTP = function() {
+  return gulp.src(config.options.path + '**/*.+(html|nunjucks)')
+  .pipe(data(function(file, cb) {
+
+    var httpData = '';
+    request
+    .get('https://raw.githubusercontent.com/GovLab/orgpedia-prototype/master/source/data/company.json')
+    .on('response', function (response) {
+      response.on('data', (chunk) => {
+        if (chunk) { httpData += chunk };
+      });
+      response.on('end', () => {
+        if (httpData.length) { console.log('Stream data recieved from HTTP (length)', httpData.length); }
+        else { console.log('No data received from HTTP'); }
+        cb(undefined, JSON.parse(httpData));
+      });
+    });
+
+  }))
+  .pipe(nunjucksRender({
+    path: ['source/templates'],
+    manageEnv: nunjucksEnv
+  }))
   .pipe(gulp.dest(config.options.sitePath));
 };

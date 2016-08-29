@@ -1,5 +1,5 @@
 // import paths
-const libDir    = 'gulp-lib/'
+const libDir    = '/gulp-lib/'
       ;
 
 // libs
@@ -16,7 +16,7 @@ var del             = require('del'),
     nunjucksRender  = require('gulp-nunjucks-render'),
 
     // gulpfile config options
-    config           = require(process.cwd() + 'gulp-config.js'),
+    config           = require(process.cwd() + '/gulp-config.js'),
 
     // local libs
     nunjucksEnv      = require(process.cwd() + libDir + 'gulp-nunjucks-env.js'),

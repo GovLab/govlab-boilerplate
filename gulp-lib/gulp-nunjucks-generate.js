@@ -9,7 +9,10 @@ exports.generatedData = {}
 // compile all the datasets into a composite set
 // for injection into nunjucks using gulp-data
 var compileData = function (dataPath, ext) {
+
+  // stupid code courtesy of node doesnt support default parameters as of v5
   ext = ext === undefined ? config.options.dataExt : ext;
+
   var dataDir = fs.readdirSync(dataPath),
   baseName, r, _data;
 
@@ -79,30 +82,3 @@ exports.generateVinyl = function (basePath, dataPath, fSuffix, dSuffix) {
   // convert files array to stream and return
   return require('stream').Readable({ objectMode: true }).wrap(es.readArray(files));
 }
-
-gulp.task('nunjucksHTTP', function() {
-  return gulp.src('source/templates/**/*.+(html|nunjucks)')
-  .pipe(data(function(file, cb) {
-
-    var httpData = '';
-    request
-    .get('https://raw.githubusercontent.com/GovLab/orgpedia-prototype/master/source/data/company.json')
-    .on('response', function (response) {
-      response.on('data', (chunk) => {
-        if (chunk) { httpData += chunk };
-      });
-      response.on('end', () => {
-        if (httpData.length) { console.log('Stream data recieved from HTTP (length)', httpData.length); }
-        else { console.log('No data received from HTTP'); }
-        cb(undefined, JSON.parse(httpData));
-      });
-    });
-
-  }))
-  .pipe(nunjucksRender({
-    path: ['source/templates'],
-    manageEnv: nunjucksEnv
-  }))
-  .pipe(gulp.dest('public'))
-  .pipe(browserSync.reload({ stream: true }));
-});
