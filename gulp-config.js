@@ -27,6 +27,7 @@ module.exports = (prefix) => {
       manageEnv: env, // function to manage nunjucks environment
       libraryPath: prefix + '/node_modules/govlab-styleguide/dist/', // path to installed sass/js library distro folder
       defaultData: prefix + '/source/data/default.json', // default dataset to use if no automatically generated template is found
+      dataIndex: prefix + '/source/data/index.json', // default name of top level json file
       hashLength: 7, // length to truncate hash for page urls
       slugLength: 128, // length to truncate title slug for page urls
       useId: // whitelist for data files to use an id hash in the url, all others will just be title slug

@@ -1,0 +1,11 @@
+- name: index
+  type: single
+  source:
+    type: remote
+    location: "https://raw.githubusercontent.com/GovLab/orgpedia-prototype/master/source/data/company.json"
+  target: index.html # (name).html used if not specified
+- name: test
+  type: multi
+  source:
+    type: local
+    location: test.json

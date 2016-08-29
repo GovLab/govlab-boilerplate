@@ -1,0 +1,1 @@
+{"data":[{"name":"index","type":"single","source":{"type":"remote","location":"https://raw.githubusercontent.com/GovLab/orgpedia-prototype/master/source/data/company.json"},"target":"index.html","id":"6a992d5529f459a44fee58c733255e86","path":""},{"name":"test","type":"multi","source":{"type":"local","location":"test.json"},"id":"098f6bcd4621d373cade4e832627b4f6","path":""}]}

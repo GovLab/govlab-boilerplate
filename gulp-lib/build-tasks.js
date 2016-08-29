@@ -103,13 +103,13 @@ exports.nunjucksGenerated = function() {
   .pipe(gulp.dest(configCwd.options.sitePath));
 };
 
-exports.nunjucksHTTP = function() {
+exports.nunjucksHTTP = function(url) {
   return gulp.src(configCwd.options.path + '**/*.+(html|nunjucks)')
   .pipe(data(function(file, cb) {
 
     var httpData = '';
     request
-    .get('https://raw.githubusercontent.com/GovLab/orgpedia-prototype/master/source/data/company.json')
+    .get(url)
     .on('response', function (response) {
       response.on('data', (chunk) => {
         if (chunk) { httpData += chunk };

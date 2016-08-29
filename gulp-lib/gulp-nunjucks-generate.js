@@ -7,35 +7,63 @@ const configCwd = require('../gulp-config.js')('.');
 var
 File            = require('vinyl'),
 es              = require('event-stream'),
+request         = require('request'),
 fs              = require('fs')
 ;
 
 // object used to compile data extracted from the data sources
 exports.generatedData = {}
+exports.lock = false;
 
 // compile all the datasets into a composite set
 // for injection into nunjucks using gulp-data
-var compileData = function (dataPath, ext) {
+var compileData = function (dataPath, ext, cb) {
 
   // stupid code courtesy of node doesnt support default parameters as of v5
   ext = ext === undefined ? config.options.dataExt : ext;
 
   var dataDir = fs.readdirSync(dataPath),
+  _dataIndex = require(config.options.dataIndex);
   baseName, r, _data;
 
-  // look for a data file matching the naming convention
-  r = new RegExp('\\' + ext + '$');
-  for (var dataset in dataDir) {
-    if (r.test(dataDir[dataset])) {
+  for (var d in _dataIndex) {
+    baseName = _dataIndex[d].name;
 
-      // trim basename
-      baseName = dataDir[dataset].replace(new RegExp('\\' + ext + '$'), '');
-
-      // add JSON to object
-      _data = require(config.options.dataPath + dataDir[dataset]).data;
-      exports.generatedData[baseName] = _data;
+    if (_dataIndex[d].source.type == 'local') {
+      // add JSON to generatedData object
+      _data = require(config.options.dataPath + _dataIndex[d].source.location).data;
+    } else if (_dataIndex[d].source.type == 'remote') {
+      var httpData = '';
+      exports.lock = true;
+      request
+      .get(url)
+      .on('error', function(err) {
+        console.log(err)
+        exports.lock = false;
+      })
+      .on('response', function (response) {
+        response.on('data', (chunk) => {
+          if (chunk) { httpData += chunk };
+        });
+        response.on('end', () => {
+          if (httpData.length) { console.log('Stream data recieved from HTTP (length)', httpData.length); }
+          else { console.log('No data received from HTTP'); }
+          cb(baseName, JSON.parse(httpData), 'remote');
+        });
+      });
+    } else {
+      console.log ('compileData: unknown source type');
     }
+
+    exports.generatedData[baseName] = _data;
+    exports.generatedData[baseName]._type = _dataIndex[d].type;
+    exports.generatedData[baseName]._target = _dataIndex[d].target || false;
   }
+}
+
+var updateData = function (name, data) {
+  exports.generatedData[name] = data;
+  exports.lock = false;
 }
 
 // generate a stream of one or more vinyl files from a json data source
@@ -50,38 +78,29 @@ exports.generateVinyl = function (basePath, dataPath, fSuffix, dSuffix) {
   dSuffix = dSuffix === undefined ? config.options.dataExt : dSuffix;
 
   // compile datasets
-  compileData(dataPath, dSuffix);
+  compileData(dataPath, dSuffix, updateData);
 
-  for (var template in base) {
-    // match a filename starting with '__' and ending with the file suffix
-    r = new RegExp('^__[^.]*\\' + fSuffix + '$');
-    if (r.test(base[template])) {
-      // read the file in as our base template
-      baseTemplate = fs.readFileSync(basePath + base[template]);
+  while (exports.lock) {
+    console.log('Waiting for data to finish compiling (this may take a few minutes)...\r');
+  }
 
-      // strip __ and extension to get base naming convention
-      baseName = base[template]
-      .replace(/^__/, '')
-      .replace(new RegExp('\\' + fSuffix + '$'), '')
-      ;
+  for (var d in exports.generatedData) {
 
-      // look for a dataset matching the naming convention
-      for (var dataset in exports.generatedData) {
-        if (dataset === baseName) {
+    if ( exports.generatedData[d]._type = 'multi') {
+      _path = exports.generatedData[d]._target || d + config.options.ext;
+      _data = exports.generatedData[d];
 
-          _data = exports.generatedData[dataset];
+      baseTemplate = fs.readFileSync(basePath + _path);
 
-          // create a new vinyl file for each datum in _data and push to files
-          // using directory based on naming convention and base template as content
-          for (var d in _data) {
-            f = new File({
-              path: _data[d].path,
-              contents: baseTemplate
-            });
-            f.data = _data[d];
-            files.push(f);
-          }
-        }
+      // create a new vinyl file for each datum in _data and push to files
+      // using directory based on naming convention and base template as content
+      for (var d in _data) {
+        f = new File({
+          path: _path,
+          contents: baseTemplate
+        });
+        f.data = _data[d];
+        files.push(f);
       }
     }
   }
