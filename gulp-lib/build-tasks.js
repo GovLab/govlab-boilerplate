@@ -86,7 +86,7 @@ exports.json = function() {
 };
 
 exports.nunjucksGenerated = function() {
-  return gen.generateVinyl(configCwd.options.path, configCwd.options.dataPath)
+  return gen.generate()
   .pipe(plumber())
   .pipe(data(function(file) {
     if (config.cliOptions.verbose) {
@@ -103,29 +103,29 @@ exports.nunjucksGenerated = function() {
   .pipe(gulp.dest(configCwd.options.sitePath));
 };
 
-exports.nunjucksHTTP = function(url) {
-  return gulp.src(configCwd.options.path + '**/*.+(html|nunjucks)')
-  .pipe(data(function(file, cb) {
+// exports.nunjucksHTTP = function(url) {
+//   return gulp.src(configCwd.options.path + '**/*.+(html|nunjucks)')
+//   .pipe(data(function(file, cb) {
 
-    var httpData = '';
-    request
-    .get(url)
-    .on('response', function (response) {
-      response.on('data', (chunk) => {
-        if (chunk) { httpData += chunk };
-      });
-      response.on('end', () => {
-        if (httpData.length) { console.log('Stream data recieved from HTTP (length)', httpData.length); }
-        else { console.log('No data received from HTTP'); }
-        cb(undefined, JSON.parse(httpData));
-      });
-    });
+//     var httpData = '';
+//     request
+//     .get(url)
+//     .on('response', function (response) {
+//       response.on('data', (chunk) => {
+//         if (chunk) { httpData += chunk };
+//       });
+//       response.on('end', () => {
+//         if (httpData.length) { console.log('Stream data recieved from HTTP (length)', httpData.length); }
+//         else { console.log('No data received from HTTP'); }
+//         cb(undefined, JSON.parse(httpData));
+//       });
+//     });
 
-  }))
-  .pipe(nunjucksRender(config.options))
-  .pipe(flatten())
-  .pipe(gulp.dest(configCwd.options.sitePath));
-};
+//   }))
+//   .pipe(nunjucksRender(config.options))
+//   .pipe(flatten())
+//   .pipe(gulp.dest(configCwd.options.sitePath));
+// };
 
 exports.nunjucks = function() {
   console.log(configCwd.options.path)
