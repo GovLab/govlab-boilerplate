@@ -1,3 +1,8 @@
+// import paths
+const libDir    = '/gulp-lib/'
+      ;
+
+// libs
 var del             = require('del'),
     gulp            = require('gulp'),
     sass            = require('gulp-sass'),
@@ -8,7 +13,18 @@ var del             = require('del'),
     sourcemaps      = require('gulp-sourcemaps'),
     browserSync     = require('browser-sync'),
     runSequence     = require('run-sequence').use(gulp),
-    nunjucksRender  = require('gulp-nunjucks-render');
+    nunjucksRender  = require('gulp-nunjucks-render'),
+
+    // gulpfile config options
+    config           = require(process.cwd() + '/gulp-config.js'),
+
+    // local libs
+    nunjucksEnv      = require(process.cwd() + libDir + 'gulp-nunjucks-env.js'),
+    nunjucksGenerate = require(process.cwd() + libDir + 'gulp-nunjucks-generate.js'),
+
+    // tasks
+    build = require(process.cwd() + libDir + 'build-tasks.js')
+    ;
 
 // Clean Dist
 gulp.task('clean', function () {
@@ -53,17 +69,10 @@ gulp.task('js', function () {
 });
 
 // Nunjucks
-gulp.task('nunjucks', function () {
-  nunjucksRender.nunjucks.configure(['source/templates/']);
-
-  // Gets .html and .nunjucks files in pages
-  return gulp.src('source/templates/**/[^_]*.html')
-    // Renders template with nunjucks
-    .pipe(nunjucksRender({ path: 'source/templates' }))
-    // output files in app folder
-    .pipe(gulp.dest('public'))
-    .pipe(browserSync.reload({ stream: true }));
-});
+gulp.task('yaml', build.yaml);
+gulp.task('json', ['yaml'], build.json);
+gulp.task('nunjucksBuildGeneratedPages', ['json'], build.nunjucksGenerated);
+gulp.task('nunjucks', ['nunjucksBuildGeneratedPages'], build.nunjucks);
 
 gulp.task('push-gh-master', shell.task(['git push origin master']));
 
@@ -82,6 +91,7 @@ gulp.task('deploy', function (callback) {
   );
 });
 
+//limit watch files
 gulp.task('watch', function () {
   gulp.watch('source/static/**/*.js', ['js']);
   gulp.watch('source/sass/**/*.scss', ['sass']);
